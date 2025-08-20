@@ -47,11 +47,21 @@ const UserSchema = new Schema({
     etablissement: {
         type: String
     },
+    verefecation: {
+        type: Number
+    },
     role: {
         type: String,
         enum: ['admin', 'user'],
         default: 'user'
-    }
+    },
+    isVerified: { 
+        type: Boolean,
+        default: false 
+    },
+    verificationToken: { 
+        type: String
+    },
 
 
 },[{timestamps: true}])
