@@ -85,7 +85,12 @@ const UserSchema = new Schema({
     birthplace: {
         type: String,
         default: "Lieu inconnu"
+    },
+    active:{
+        type: Boolean,
+        default: true
     }
+
 
 },{timestamps: true})
 
