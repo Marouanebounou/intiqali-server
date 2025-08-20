@@ -26,7 +26,7 @@ export const Login = async (req,res) =>{
 }
 export const SignUp = async (req,res) =>{
     try {
-        const {firstName,lastName,email,phone,password} = req.body;
+        const {firstName,lastName,email,phone,password,sexe} = req.body;
         const isistenUser = await User.findOne({email});
         const isNumberExist = await User.findOne({phone});
         if(isistenUser){
@@ -42,6 +42,7 @@ export const SignUp = async (req,res) =>{
                 lastName,
                 email,
                 phone,
+                sexe,
                 password:hashedPassword,
                 verificationToken
             })
