@@ -1,0 +1,28 @@
+{
+  "name": "intiqali-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marouanebounou/intiqali-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Marouanebounou/intiqali-server/issues"
+  },
+  "homepage": "https://github.com/Marouanebounou/intiqali-server#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mongoose": "^8.17.2",
+    "nodemon": "^3.1.10"
+  }
+}
