@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { type } from "os";
 
 const LikesSchema =  new mongoose.Schema({
     user:{
@@ -11,10 +10,6 @@ const LikesSchema =  new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Post',
         required: true
-    },
-    likesCount: {
-        type: Number,
-        default: 0
     }
 },{timestamps: true})
 
