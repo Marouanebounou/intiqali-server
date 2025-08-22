@@ -51,3 +51,45 @@ export const editComment = async(req,res)=>{
     }
 }
 
+export const deleteComment = async (req, res) => {
+    try {
+        const userId = req.user._id
+        const commentId = req.params.id
+
+        if (!userId) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        const comment = await Comment.findById(commentId);
+
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        if(comment.createdBy.toString() !== userId.toString()){
+            return res.status(400).json({message:"You are not authorized"})
+        }
+
+        await Comment.findByIdAndDelete(commentId);
+        res.status(200).json({ message: "Comment deleted successfully" });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const getComment = async (req , res) =>{
+    try {
+        const postId = req.params.id
+        const post = await Post.findById(postId)
+        if(!post){
+            return res.status(400).json({message:"Post not found"})
+        }
+        const comments = await Comment.find({postId:postId})
+        res.status(200).json({comments})
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
