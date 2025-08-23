@@ -73,3 +73,39 @@ export const gettAllPosts = async (req,res)=>{
         console.log(error);
     }
 }
+
+export const like = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.user._id;
+        
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+        
+        const userIndex = post.likes.indexOf(userId.toString());
+        
+        if (userIndex > -1) {
+            // Unlike the post
+            post.likes.splice(userIndex, 1);
+            await post.save();
+            return res.status(200).json({ 
+                message: "Post unliked successfully", 
+                likes: post.likes.length 
+            });
+        } else {
+            // Like the post
+            post.likes.push(userId.toString());
+            await post.save();
+            return res.status(200).json({ 
+                message: "Post liked successfully", 
+                likes: post.likes.length 
+            });
+        }
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
