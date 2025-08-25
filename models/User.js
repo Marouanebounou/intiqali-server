@@ -1,3 +1,4 @@
+import { url } from "inspector";
 import mongoose, { Schema } from "mongoose";
 
 const UserSchema = new Schema({
@@ -16,7 +17,6 @@ const UserSchema = new Schema({
     },
     phone:{
         type: Number,
-        required: true,
     },
     password: {
         type: String,
@@ -24,7 +24,7 @@ const UserSchema = new Schema({
     },
     sexe:{
         type: String,
-        enum: ['homme', 'femme']
+        enum: ['male', 'female']
     },
     adress:{
         type: String,
@@ -82,6 +82,9 @@ const UserSchema = new Schema({
     active:{
         type: Boolean,
         default: true
+    },
+    image:{
+        url: String
     }
 
 

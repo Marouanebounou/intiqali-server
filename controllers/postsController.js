@@ -1,25 +1,41 @@
 import Post from "../models/Post.js"
 import User from "../models/User.js"
+import cloudinary from "../config/cloudinary.js"
 
-export const createPost = async (req,res) =>{
-    try {
-        if (!req.user || !req.user._id) {
-            return res.status(401).json({ message: "User not authenticated" });
-        }
-        const { content, img } = req.body;
-        const userId = req.user._id;
-        const post = new Post({
-            content,
-            img,
-            createdBy: userId
-        });
-        await post.save();
-        res.status(200).json({ message: "Post created successfully" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Internal server error" });
+export const createPost = async (req, res) => {
+  try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "User not authenticated" });
     }
-}
+
+    const { content } = req.body;
+    const userId = req.user._id;
+
+    let imageUrl = null;
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "posts",
+      });
+      imageUrl = result.secure_url; // ✅ assign Cloudinary URL here
+    }
+
+    const post = new Post({
+      content,
+      img: imageUrl, // ✅ now the URL gets saved
+      createdBy: userId,
+    });
+
+    await post.save();
+
+    res.status(200).json({
+      message: "Post created successfully",
+      post,
+    });
+  } catch (error) {
+    console.error("Error creating post:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const editPost = async (req ,res) =>{
     try {
@@ -67,8 +83,17 @@ export const getPost = async (req,res)=>{
 
 export const gettAllPosts = async (req,res)=>{
     try {
-        const posts = await Post.find();
-        res.status(200).json({posts})
+        const posts = await Post.find().sort({ createdAt: -1 });
+        Promise.all(
+            posts.map(async (post) => {
+                const user = await User.findById(post.createdBy).select("firstName lastName commentsCount");
+                post.createdBy = user;
+            })
+        ).then(() => {
+            res.status(200).json({posts})
+        }).catch((error) =>
+            console.log(error)
+        )
     } catch (error) {
         console.log(error);
     }

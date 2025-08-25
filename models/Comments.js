@@ -22,7 +22,11 @@ const CommentsSchema = new mongoose.Schema({
     replies: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Comments'
-    }]
+    }],
+    commentUser: {
+        type: String
+    }
+
 }, {timestamps: true})
 
 

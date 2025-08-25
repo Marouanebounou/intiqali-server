@@ -39,16 +39,18 @@ export const SignUp = async (req,res) =>{
         }
         else{
             const hashedPassword =  await bcrypt.hash(password , 10);
-            const verificationToken = crypto.randomBytes(32).toString('hex');
+            const verificationTokenId = crypto.randomBytes(32).toString('hex');
             const user = new User({
                 firstName,
                 lastName,
                 email,
                 phone,
                 sexe,
+                verificationToken: verificationTokenId,
                 password:hashedPassword,
-                verificationToken
             })
+
+            await user.save();
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
@@ -57,7 +59,7 @@ export const SignUp = async (req,res) =>{
                 }
             })
 
-            const verificationUrl = `http://localhost:3000/verify/${verificationToken}`
+            const verificationUrl = `${process.env.CLIENT_URL}verify/${verificationTokenId}`
 
             transporter.sendMail({
                 from: process.env.EMAIL,
@@ -107,8 +109,7 @@ export const SignUp = async (req,res) =>{
 </html>
 `
             })
-
-            await user.save();
+            
             res.status(200).json({message:"User created successfully"});
         }
 
@@ -117,10 +118,24 @@ export const SignUp = async (req,res) =>{
     }
 
 }
+export const getUser = async(req , res) => {
+  try {
+    const userId = req.user._id;
+    console.log(userId);
+    
+    const user = await User.findById(userId).select("firstName lastName email phone sexe _id");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 export const verifyEmail = async (req, res) => {
   try {
-    const { token } = req.query;
+    const { token } = req.params;
 
     const user = await User.findOne({ verificationToken: token });
     if (!user) return res.status(400).json({ message: "Invalid token" });

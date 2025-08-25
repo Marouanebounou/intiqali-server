@@ -9,6 +9,10 @@ export const createComment = async (req,res) => {
     try {
         const postId = req.params.id
         const userId = req.user._id
+        const commentWriter = await User.findById(userId)
+        const commentName =  commentWriter.firstName + " " + commentWriter.lastName
+
+        
         const {content} = req.body
         const post = await Post.findById(postId)
         if(!post){
@@ -17,8 +21,12 @@ export const createComment = async (req,res) => {
             const comment = new Comment({
                 content,
                 createdBy:userId,
-                postId:postId
+                postId:postId,
+                commentUser: commentName
             })
+            post.commentsCount += 1
+            await post.save()
+            
             await comment.save()
             res.status(200).json({message:"Comment created successfuly"})
         }
@@ -83,10 +91,22 @@ export const getComment = async (req , res) =>{
     try {
         const postId = req.params.id
         const post = await Post.findById(postId)
+        const commentwriter = await User.findById(post.createdBy).select("firstName lastName")
+        console.log(post);
         if(!post){
             return res.status(400).json({message:"Post not found"})
         }
         const comments = await Comment.find({postId:postId})
+        res.status(200).json({comments})
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const getComments = async (req , res) =>{
+    try {
+        const comments = await Comment.find()
         res.status(200).json({comments})
     } catch (error) {
         console.log(error);

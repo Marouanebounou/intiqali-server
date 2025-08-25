@@ -2,10 +2,11 @@ import Router from 'express'
 import { createPost, editPost ,deletePost, userPosts, getPost , gettAllPosts, like} from '../controllers/postsController.js'
 import { postAuth } from '../middlewares/postMiddleware.js'
 import { requireAuth } from '../middlewares/authMiddleware.js'
+import uploade from '../config/uploade.js'
 const router = Router()
 
 //id of the user
-router.post('/create',requireAuth  ,createPost)
+router.post('/create',requireAuth,uploade.single('img')  ,createPost)
 //id of the post
 router.put('/update/:id' , requireAuth, postAuth , editPost)
 //id of the post
