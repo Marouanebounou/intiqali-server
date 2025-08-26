@@ -1,5 +1,6 @@
 import express from 'express';
 import connectDB from './config/db.js';
+import './config/cloudinary.js'; // Import cloudinary config
 import authRouter from './routes/authRouter.js';
 import finishProfileRouter from './routes/finishProfileRouter.js';
 import postsRouter from './routes/postsRouter.js';
@@ -25,7 +26,7 @@ app.use(cors({
 }));
 
 app.use('/api/auth', authRouter);
-app.use('/api/complete', finishProfileRouter);
+app.use('/api/profile', finishProfileRouter);
 app.use('/api/posts', postsRouter);
 app.use('/api/post', likesRouter);
 app.use('/api/comment', commentsRouter);
@@ -36,9 +37,9 @@ const server = http.createServer(app);
 // Fixed Socket.IO CORS configuration
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173',  // Changed from '*' to specific origin
+        origin: 'http://localhost:5173', 
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        credentials: true  // Added credentials support
+        credentials: true 
     }
 });
 

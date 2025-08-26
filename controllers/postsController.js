@@ -10,19 +10,24 @@ export const createPost = async (req, res) => {
 
     const { content } = req.body;
     const userId = req.user._id;
+    const postWriter = await User.findById(userId);
+    const postName = postWriter.firstName + " " + postWriter.lastName;
+    const userImage = postWriter.profileImage
 
     let imageUrl = null;
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "posts",
       });
-      imageUrl = result.secure_url; // ✅ assign Cloudinary URL here
+      imageUrl = result.secure_url;
     }
 
     const post = new Post({
       content,
-      img: imageUrl, // ✅ now the URL gets saved
+      img: imageUrl,
       createdBy: userId,
+      postUser: postName,
+      userImage: userImage
     });
 
     await post.save();
@@ -65,7 +70,7 @@ export const deletePost = async (req , res) => {
 export const userPosts = async(req,res) => {
     try {
         const createdBy = req.params.id 
-        const posts = await Post.find({createdBy});
+        const posts = await Post.find({createdBy}).sort({ createdAt: -1 });
         res.status(200).json({posts})
     } catch (error) {
         console.log(error);
@@ -86,7 +91,7 @@ export const gettAllPosts = async (req,res)=>{
         const posts = await Post.find().sort({ createdAt: -1 });
         Promise.all(
             posts.map(async (post) => {
-                const user = await User.findById(post.createdBy).select("firstName lastName commentsCount");
+                const user = await User.findById(post.createdBy).select("-password");
                 post.createdBy = user;
             })
         ).then(() => {

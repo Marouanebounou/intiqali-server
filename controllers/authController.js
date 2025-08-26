@@ -31,11 +31,8 @@ export const SignUp = async (req,res) =>{
     try {
         const {firstName,lastName,email,phone,password,sexe} = req.body;
         const isistenUser = await User.findOne({email});
-        const isNumberExist = await User.findOne({phone});
         if(isistenUser){
             res.status(400).json({message:"Email already exist"});
-        }else if(isNumberExist){
-            res.status(400).json({message:"Phone number already exist"});
         }
         else{
             const hashedPassword =  await bcrypt.hash(password , 10);
@@ -44,8 +41,8 @@ export const SignUp = async (req,res) =>{
                 firstName,
                 lastName,
                 email,
-                phone,
                 sexe,
+                phone,
                 verificationToken: verificationTokenId,
                 password:hashedPassword,
             })
@@ -123,7 +120,7 @@ export const getUser = async(req , res) => {
     const userId = req.user._id;
     console.log(userId);
     
-    const user = await User.findById(userId).select("firstName lastName email phone sexe _id");
+    const user = await User.findById(userId).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

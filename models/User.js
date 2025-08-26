@@ -17,6 +17,9 @@ const UserSchema = new Schema({
     },
     phone:{
         type: Number,
+        default: null,
+        unique: true,
+        sparse: true
     },
     password: {
         type: String,
@@ -83,9 +86,18 @@ const UserSchema = new Schema({
         type: Boolean,
         default: true
     },
-    image:{
-        url: String
-    }
+    profileImage:{
+        type: String,
+        default: `https://res.cloudinary.com/dx6x9d8p2/image/upload/v1756153972/default-profile-account-unknown_kckvjg.png`
+    },
+    coverImage: {
+        type: String,
+        default: `https://res.cloudinary.com/dx6x9d8p2/image/upload/v1756154031/default_image_ypatak.png`
+    },
+    bio: {
+        type: String,
+        default: " "
+    },
 
 
 },{timestamps: true})

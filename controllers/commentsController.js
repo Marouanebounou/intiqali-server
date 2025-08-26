@@ -11,7 +11,7 @@ export const createComment = async (req,res) => {
         const userId = req.user._id
         const commentWriter = await User.findById(userId)
         const commentName =  commentWriter.firstName + " " + commentWriter.lastName
-
+        const userImage = commentWriter.profileImage
         
         const {content} = req.body
         const post = await Post.findById(postId)
@@ -22,7 +22,8 @@ export const createComment = async (req,res) => {
                 content,
                 createdBy:userId,
                 postId:postId,
-                commentUser: commentName
+                commentUser: commentName,
+                userImage: userImage
             })
             post.commentsCount += 1
             await post.save()

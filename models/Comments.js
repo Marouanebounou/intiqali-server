@@ -25,6 +25,9 @@ const CommentsSchema = new mongoose.Schema({
     }],
     commentUser: {
         type: String
+    },
+    userImage: {
+        type: String
     }
 
 }, {timestamps: true})

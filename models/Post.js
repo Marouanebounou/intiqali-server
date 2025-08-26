@@ -26,8 +26,11 @@ const PostSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    image:{
-        url: String
+    userImage:{
+        type: String
+    },
+    postUser: {
+        type: String
     }
 }, {timestamps: true})
 
