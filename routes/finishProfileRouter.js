@@ -18,8 +18,8 @@ const debugRequest = (req, res, next) => {
   next();
 };
 
-router.post('/finishProfile/:id',finishprofile)
-router.post('/finishProfetionellfields/:id',finishProffetionel)
+router.put('/finishProfile/:id',finishprofile)
+router.put('/finishProfetionellfields/:id',finishProffetionel)
 router.put('/profileimage/:id' , debugRequest, flexibleUpload, setProfile)
 router.get('/profileimage/:id' ,setProfile)
 router.put('/coverimage/:id', debugRequest, flexibleUpload, setCover)

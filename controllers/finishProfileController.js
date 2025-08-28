@@ -4,11 +4,12 @@ import fs from "fs";
 
 export const finishprofile = async(req,res)=>{
     try {
-        const {adress , birthdate , birthplace} = req.body
+        const {adress , birthdate , birthplace , ville} = req.body
         const user = await User.findById(req.params.id);
         user.birthDate = birthdate
         user.birthplace = birthplace
         user.adress = adress
+        user.ville = ville
         await user.save()
         res.status(200).json({message:"Profile completed succesfuly"})
     } catch (error) {
@@ -78,14 +79,13 @@ export const setProfile = async (req, res) => {
 
 export const finishProffetionel = async(req , res )=>{
     try {
-        const {ministère , département , fonction , grade , echelle , ville , etablissement} = req.body
+        const {ministère , département , fonction , grade , echelle  , etablissement} = req.body
         const user = await User.findById(req.params.id);
         user.ministère = ministère
         user.département = département
         user.fonction = fonction
         user.grade = grade
         user.echelle = echelle
-        user.ville = ville
         user.etablissement = etablissement
         await user.save()
         res.status(200).json({message:"Profetionell fileds completed succesfuly"})
