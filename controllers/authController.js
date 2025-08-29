@@ -205,7 +205,7 @@ export const verifyEmail = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.id;
     await Post.deleteMany({ createdBy: userId });
     await Comment.deleteMany({ createdBy: userId });
     await Like.deleteMany({ createdBy: userId });

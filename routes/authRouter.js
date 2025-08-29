@@ -8,7 +8,7 @@ router.post('/login',Login);
 router.post('/register',SignUp);
 router.get('/user' ,requireAuth, getUser)
 router.get('/verify/:token', verifyEmail)
-router.delete('/delete', requireAuth, deleteUser)
+router.delete('/delete/:id', requireAuth, deleteUser)
 router.put('/update/:id', requireAuth, editUser)
 
 export default router
