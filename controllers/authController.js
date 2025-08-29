@@ -6,6 +6,7 @@ import crypto from "crypto";
 import Post from "../models/Post.js";
 import Comment from "../models/Comments.js";
 import Like from "../models/Likes.js";
+import { log } from "console";
 
 export const Login = async (req, res) => {
   try {
@@ -217,3 +218,26 @@ export const deleteUser = async (req, res) => {
     console.log(error);
   }
 };
+
+
+export const editUser = async(req,res)=>{
+  
+try {
+  const user =  await User.findById(req.params.id)
+  const userId = user._id
+  console.log(userId);
+
+  const {firstName,lastName} = req.body
+  if(!user){
+    return res.status(400).json({message:"User not found"})
+  }else{
+    user.firstName = firstName
+    user.lastName = lastName
+    await user.save()
+    res.status(200).json({message:"User edited successfuly"})
+  }
+
+} catch (error) {
+  console.log(error);
+}
+}
