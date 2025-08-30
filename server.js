@@ -30,7 +30,7 @@ const initializeApp = async () => {
     ].filter(Boolean);
 
     app.use(cors({
-        origin: allowedOrigins,
+        origin: "*",
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true
     }));
@@ -51,7 +51,7 @@ const initializeApp = async () => {
         // Socket.IO configuration
         io = new Server(server, {
             cors: {
-                origin: allowedOrigins,
+                origin: "*",
                 methods: ['GET', 'POST', 'PUT', 'DELETE'],
                 credentials: true 
             }
