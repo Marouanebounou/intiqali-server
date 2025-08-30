@@ -20,14 +20,10 @@ const connectDb = async () => {
 
     console.log("Attempting to connect to MongoDB...");
     
-    // Connect to MongoDB with proper options
+    // Connect to MongoDB with modern options
     await mongoose.connect(mongoUrl, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 10000, // 10 seconds
       socketTimeoutMS: 45000, // 45 seconds
-      bufferCommands: false, // Disable mongoose buffering
-      bufferMaxEntries: 0, // Disable mongoose buffering
     });
     
     console.log("Database connected successfully");
