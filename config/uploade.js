@@ -2,15 +2,23 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Create uploads directory if it doesn't exist
-const uploadDir = "./uploads";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+// Create uploads directory if it doesn't exist (only for local development)
+if (process.env.VERCEL !== '1') {
+  const uploadDir = "./uploads";
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
 }
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, uploadDir);
+    if (process.env.VERCEL === '1') {
+      // Vercel: use memory storage
+      cb(null, '/tmp');
+    } else {
+      // Local development: use disk storage
+      cb(null, './uploads');
+    }
   },
   filename: function (req, file, cb) {
     // Generate unique filename with timestamp

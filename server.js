@@ -18,11 +18,26 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// Fixed CORS configuration
+// CORS configuration for both development and production
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://your-frontend-domain.vercel.app', // Replace with your actual frontend domain
+  process.env.FRONTEND_URL // Add this environment variable in Vercel
+].filter(Boolean);
+
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true  // Changed from withCredentials to credentials
+    credentials: true
 }));
 
 app.use('/api/auth', authRouter);
@@ -32,19 +47,26 @@ app.use('/api/post', likesRouter);
 app.use('/api/comment', commentsRouter);
 app.use('/api/messages', messagesRouter);
 
-const server = http.createServer(app);
+let io = null;
 
-// Fixed Socket.IO CORS configuration
-const io = new Server(server, {
-    cors: {
-        origin: 'http://localhost:5173', 
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        credentials: true 
-    }
-});
+// Only start the server if we're not in Vercel (serverless)
+if (process.env.VERCEL !== '1') {
+    const server = http.createServer(app);
 
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+    // Socket.IO configuration
+    io = new Server(server, {
+        cors: {
+            origin: allowedOrigins,
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
+            credentials: true 
+        }
+    });
 
+    server.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+// Export the app for Vercel and io for local development
+export default app;
 export { io };

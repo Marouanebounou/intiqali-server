@@ -37,11 +37,15 @@ export const setProfile = async (req, res) => {
         });
         imageUrl = result.secure_url;
         
-        fs.unlinkSync(file.path);
-        console.log("File cleaned up successfully");
+        // Clean up uploaded file (only if it's a local file, not Vercel temp)
+        if (process.env.VERCEL !== '1' && file.path && file.path.startsWith('./uploads')) {
+          fs.unlinkSync(file.path);
+          console.log("File cleaned up successfully");
+        }
       } catch (uploadError) {
         console.error("Cloudinary upload error:", uploadError);
-        if (file && file.path) {
+        // Clean up uploaded file even if upload fails
+        if (process.env.VERCEL !== '1' && file && file.path && file.path.startsWith('./uploads')) {
           fs.unlinkSync(file.path);
         }
         return res.status(500).json({ message: "Failed to upload image", error: uploadError.message });
@@ -64,9 +68,9 @@ export const setProfile = async (req, res) => {
     if (req.files && req.files.length > 0) {
       req.files.forEach(file => {
         try {
-          if (file && file.path) {
-            fs.unlinkSync(file.path);
-          }
+                  if (process.env.VERCEL !== '1' && file && file.path && file.path.startsWith('./uploads')) {
+          fs.unlinkSync(file.path);
+        }
         } catch (cleanupError) {
           console.error("Error cleaning up file:", cleanupError);
         }
@@ -117,13 +121,15 @@ export const setCover = async (req, res) => {
         imageUrl = result.secure_url;
         console.log("Cover image uploaded successfully:", imageUrl);
         
-        // Clean up uploaded file
-        fs.unlinkSync(file.path);
-        console.log("Cover file cleaned up successfully");
+        // Clean up uploaded file (only if it's a local file, not Vercel temp)
+        if (process.env.VERCEL !== '1' && file.path && file.path.startsWith('./uploads')) {
+          fs.unlinkSync(file.path);
+          console.log("Cover file cleaned up successfully");
+        }
       } catch (uploadError) {
         console.error("Cloudinary upload error:", uploadError);
         // Clean up uploaded file even if upload fails
-        if (file && file.path) {
+        if (process.env.VERCEL !== '1' && file && file.path && file.path.startsWith('./uploads')) {
           fs.unlinkSync(file.path);
         }
         return res.status(500).json({ message: "Failed to upload cover image", error: uploadError.message });
@@ -143,11 +149,11 @@ export const setCover = async (req, res) => {
   } catch (error) {
     console.error("Error in setCover:", error);
     
-    // Clean up uploaded files if they exist
-    if (req.files && req.files.length > 0) {
+    // Clean up uploaded files if they exist (only local files)
+    if (process.env.VERCEL !== '1' && req.files && req.files.length > 0) {
       req.files.forEach(file => {
         try {
-          if (file && file.path) {
+          if (file && file.path && file.path.startsWith('./uploads')) {
             fs.unlinkSync(file.path);
           }
         } catch (cleanupError) {
