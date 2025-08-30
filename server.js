@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 5000;
 // CORS configuration for both development and production
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://your-frontend-domain.vercel.app', // Replace with your actual frontend domain
+  'https://coruscating-florentine-742350.netlify.app/', // Replace with your actual frontend domain
   process.env.FRONTEND_URL // Add this environment variable in Vercel
 ].filter(Boolean);
 
