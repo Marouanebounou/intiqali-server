@@ -25,8 +25,7 @@ const initializeApp = async () => {
     app.use(cors({
         origin: true, // Allow all origins
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        credentials: true,
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+        credentials: true
     }));
 
     app.use('/api/auth', authRouter);
