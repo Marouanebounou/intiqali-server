@@ -241,3 +241,26 @@ try {
   console.log(error);
 }
 }
+
+export const editPassword =async (req,res)=>{
+  try {
+    const userId = req.params.id
+    const user = await User.findById(userId)
+    const oldPassword = req.body.oldPassword
+    const newPassword = req.body.newPassword
+    if(!user){
+      return res.status(400).json({message:"User not found"})
+    }
+    const isMatched = await bcrypt.compare(oldPassword, user.password)
+    if(!isMatched){
+      return res.status(400).json({message:"Old password is incorrect"})
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+    user.password = hashedPassword
+    await user.save()
+    res.status(200).json({message:"Password edited successfuly"})
+    
+  } catch (error) {
+    console.log(error);
+  }
+}
