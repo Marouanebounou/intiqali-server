@@ -5,7 +5,7 @@ import { requireAuth } from "../middlewares/authMiddleware.js";
 
 const route = Router();
 
-route.post('/like/:id',requireAuth ,likePost)
+route.post('/like/:id/:user' ,likePost)
 
 route.post('/unlike/:id', requireAuth ,unlikePost)
 
