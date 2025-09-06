@@ -18,16 +18,12 @@ export const likePost = async(req,res)=>{
         const isLiked = await Likes.findOne({post:postId,user:userId})
         if(isLiked){
             await Likes.findByIdAndDelete(isLiked._id)
-            //dicreamnt likes on post
             await Post.findByIdAndUpdate(postId,{$inc:{likesCount:-1}})
-            
             io.emit('unlike',postId)
             res.status(200).json({message:"Post unliked successfuly"})
         }else{
-            //Like
             const newLike = new Likes({post:postId,user:userId})
             await newLike.save()
-            //increment likes on post
             await Post.findByIdAndUpdate(postId,{$inc:{likesCount:1}})
             res.status(200).json({message:"Post liked successfuly"})
         }
@@ -78,6 +74,18 @@ export const getLikes = async(req,res)=>{
         }
     } catch (error) {
         console.log(error);
+    }
+}
+
+// Get all likes for a specific user
+export const getUserLikes = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const likes = await Likes.find({ user: userId });
+        res.status(200).json({ likes });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error fetching user likes" });
     }
 }
 
