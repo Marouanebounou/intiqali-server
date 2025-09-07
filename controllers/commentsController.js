@@ -8,7 +8,7 @@ import nodemailer from 'nodemailer'
 export const createComment = async (req,res) => {
     try {
         const postId = req.params.id
-        const userId = req.user._id
+        const userId = req.params.userId
         const commentWriter = await User.findById(userId)
         const commentName =  commentWriter.firstName + " " + commentWriter.lastName
         const userImage = commentWriter.profileImage

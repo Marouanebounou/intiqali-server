@@ -4,7 +4,7 @@ import { requireAuth } from "../middlewares/authMiddleware.js";
 
 const route = Router();
 
-route.post('/create/:id',requireAuth, createComment)
+route.post('/create/:id/:userId', createComment)
 route.put('/edit/:id',  requireAuth ,editComment)
 route.delete('/delete/:id',requireAuth, deleteComment)
 // post id 
