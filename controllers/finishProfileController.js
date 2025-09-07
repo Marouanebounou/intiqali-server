@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
+import Post from "../models/Post.js";
 
 export const finishprofile = async(req,res)=>{
     try {
@@ -21,6 +22,7 @@ export const setProfile = async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await User.findById(userId);
+    const userPosts = await Post.find({createdBy : userId})
     if (!user) {
       console.log("User not found for ID:", userId);
       return res.status(404).json({ message: "User not found" });
@@ -54,6 +56,11 @@ export const setProfile = async (req, res) => {
       console.log("No files uploaded");
     }
 
+    userPosts.forEach(async(post)=>{
+      post.userImage = imageUrl
+      console.log("post user image updated");
+      await post.save()
+    })
     // Update user profile image
     user.profileImage = imageUrl;
     await user.save();

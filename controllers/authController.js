@@ -223,9 +223,12 @@ export const deleteUser = async (req, res) => {
 export const editUser = async(req,res)=>{
   
 try {
+  
   const user =  await User.findById(req.params.id)
   const userId = user._id
-  console.log(userId);
+  const userPosts = await Post.find({createdBy : userId})
+  const email = req.params.email
+  const isEmailExist = await User.findOne({email})
 
   const {firstName,lastName} = req.body
   if(!user){
@@ -233,8 +236,41 @@ try {
   }else{
     user.firstName = firstName
     user.lastName = lastName
+    userPosts.forEach(async(post)=>{
+      post.postUser = `${firstName} ${lastName}`
+      await post.save()
+    })
     await user.save()
-    res.status(200).json({message:"User edited successfuly"})
+    const token = jwt.sign(
+          {
+            id: isEmailExist._id,
+            firstName: isEmailExist.firstName,
+            lastName: isEmailExist.lastName,
+            email: isEmailExist.email,
+            phone: isEmailExist.phone,
+            sexe: isEmailExist.sexe,
+            adress: isEmailExist.adress,
+            ministère: isEmailExist.ministère,
+            département: isEmailExist.département,
+            fonction: isEmailExist.fonction,
+            grade: isEmailExist.grade,
+            echelle: isEmailExist.echelle,
+            ville: isEmailExist.ville,
+            etablissement: isEmailExist.etablissement,
+            role: isEmailExist.role,
+            isVerified: isEmailExist.isVerified,
+            verificationToken: isEmailExist.verificationToken,
+            birthDate: isEmailExist.birthDate,
+            birthplace: isEmailExist.birthplace,
+            active: isEmailExist.active,
+            profileImage: isEmailExist.profileImage,
+            coverImage: isEmailExist.coverImage,
+            bio: isEmailExist.bio,
+          },
+          process.env.JWT_SECRET_KEY,
+          { expiresIn: "7d" }
+        );
+    res.status(200).json({message:"User edited successfuly" , token});
   }
 
 } catch (error) {
