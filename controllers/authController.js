@@ -284,6 +284,14 @@ export const editPassword =async (req,res)=>{
     const user = await User.findById(userId)
     const oldPassword = req.body.oldPassword
     const newPassword = req.body.newPassword
+    const client = process.env.CLIENT_URL
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.PASSWORD,
+        },
+      });
     if(!user){
       return res.status(400).json({message:"User not found"})
     }
@@ -294,6 +302,49 @@ export const editPassword =async (req,res)=>{
     const hashedPassword = await bcrypt.hash(newPassword, 10)
     user.password = hashedPassword
     await user.save()
+    transporter.sendMail({
+        from: process.env.EMAIL,
+        to: user.email,
+        subject: "Password Changed Successfully",
+        html:`
+          <!-- Password Changed Email Template (use in transactional email, inline CSS for max compatibility) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Password Changed — Notification Email</title>
+  <style>
+    /* Most email clients ignore external CSS; keep styles minimal and inline where possible. */
+    body { background-color:#f3f4f6; margin:0; padding:24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+    .container { max-width:600px; margin:0 auto; }
+    .card { background:#ffffff; border-radius:8px; padding:28px; box-shadow:0 6px 18px rgba(16,24,40,0.06); }
+    h1 { font-size:20px; margin:0 0 8px; color:#0f172a; }
+    p { color:#334155; line-height:1.5; font-size:15px; margin:12px 0; }
+    .muted { color:#64748b; font-size:13px; }
+    .button { display:inline-block; background:#0b74ff; color:#fff; text-decoration:none; padding:10px 16px; border-radius:6px; font-weight:600; }
+    .footer { text-align:center; color:#94a3b8; font-size:12px; margin-top:18px; }
+    .meta { background:#f8fafc; border-radius:6px; padding:12px; margin-top:14px; font-size:13px; color:#475569; }
+    @media (max-width:480px) { .card { padding:18px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card" role="article" aria-label="Password changed notification">
+      <h1>Password changed successfully</h1>
+      <p class="muted">Hi ${user.firstName},</p>
+      <p>We wanted to let you know that your account password was changed. If you made this change, no further action is needed.</p>
+      <p>If you did not change your password, please secure your account immediately by resetting your password and reviewing recent activity.</p>
+      <p class="muted">If you have any questions, reply to this email or visit our help center.</p>
+
+      <div class="footer">&copy; 2025 Intiqali • All rights reserved</div>
+    </div>
+  </div>
+</body>
+</html>
+
+        `
+      })
     res.status(200).json({message:"Password edited successfuly"})
     
   } catch (error) {
