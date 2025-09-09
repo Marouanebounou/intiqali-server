@@ -58,7 +58,6 @@ export const setProfile = async (req, res) => {
 
     userPosts.forEach(async(post)=>{
       post.userImage = imageUrl
-      console.log("post user image updated");
       await post.save()
     })
     // Update user profile image
