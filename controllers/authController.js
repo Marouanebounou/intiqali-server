@@ -351,3 +351,31 @@ export const editPassword =async (req,res)=>{
     console.log(error);
   }
 }
+
+
+export const edit = async (req,res)=>{
+  try {
+    const userId = req.params.id
+    const user = await User.findById(userId)
+    if(!user){
+      return res.status(400).json({message:"User not found"})
+    }
+    const { phone, bio, birthDate, birthplace, adress, ministère, département, fonction, grade, echelle, ville, etablissement } = req.body;
+    user.phone = phone
+    user.bio = bio
+    user.birthDate = birthDate
+    user.birthplace = birthplace
+    user.adress = adress
+    user.ministère = ministère
+    user.département = département
+    user.fonction = fonction
+    user.grade = grade
+    user.echelle = echelle
+    user.ville = ville
+    user.etablissement = etablissement
+    await user.save()
+    res.status(200).json({message:"User edited successfuly"})
+  } catch (error) {
+    console.log(error);
+  }
+}
