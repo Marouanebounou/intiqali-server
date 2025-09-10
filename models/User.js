@@ -98,6 +98,18 @@ const UserSchema = new Schema({
         type: String,
         default: " "
     },
+    friends: {
+        type: Array,
+        default: [] 
+    },
+    friendsRequests: {
+        type: Array,
+        default: []
+    },
+    blocked: {
+        type: Array,    
+        default: []
+    },
 
 
 },{timestamps: true})

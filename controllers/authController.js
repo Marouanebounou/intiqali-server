@@ -6,7 +6,6 @@ import crypto from "crypto";
 import Post from "../models/Post.js";
 import Comment from "../models/Comments.js";
 import Like from "../models/Likes.js";
-import { log } from "console";
 
 export const Login = async (req, res) => {
   try {
@@ -51,7 +50,7 @@ export const Login = async (req, res) => {
           process.env.JWT_SECRET_KEY,
           { expiresIn: "7d" }
         );
-        res.status(200).json({ message: "Login successful", token });
+        res.status(200).json({ message: "Login successful", token , isVerified: isEmailExist.isVerified});
       }
     }
   } catch (error) {
