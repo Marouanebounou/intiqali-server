@@ -7,6 +7,7 @@ import postsRouter from './routes/postsRouter.js';
 import commentsRouter from './routes/commentsRouter.js';
 import likesRouter from './routes/likesRouter.js';
 import messagesRouter from './routes/messagesRouter.js';
+import friendsRouter from './routes/friendsRouter.js';
 import { Server } from 'socket.io';
 import http from 'http';
 import cors from 'cors';
@@ -34,6 +35,7 @@ const initializeApp = async () => {
     app.use('/api/post', likesRouter);
     app.use('/api/comment', commentsRouter);
     app.use('/api/messages', messagesRouter);
+    app.use('/api/friends' , friendsRouter);
 
     // Add route aliases for backward compatibility
     app.use('/auth', authRouter);

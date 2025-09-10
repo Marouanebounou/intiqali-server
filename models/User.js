@@ -106,6 +106,10 @@ const UserSchema = new Schema({
         type: Array,
         default: []
     },
+    requestSent: {
+        type: Array,
+        default: []
+    },
     blocked: {
         type: Array,    
         default: []

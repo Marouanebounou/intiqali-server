@@ -101,6 +101,7 @@ export const SignUp = async (req, res) => {
         ville,
         verificationToken: verificationTokenId,
         password: hashedPassword,
+        
       });
 
       await user.save();
@@ -169,6 +170,8 @@ export const SignUp = async (req, res) => {
     console.log(error);
   }
 };
+
+
 export const getUser = async (req, res) => {
   try {
     const userId = req.params.id;
