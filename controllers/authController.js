@@ -6,6 +6,7 @@ import crypto from "crypto";
 import Post from "../models/Post.js";
 import Comment from "../models/Comments.js";
 import Like from "../models/Likes.js";
+import { create } from "domain";
 
 export const Login = async (req, res) => {
   try {
@@ -50,7 +51,11 @@ export const Login = async (req, res) => {
           process.env.JWT_SECRET_KEY,
           { expiresIn: "7d" }
         );
-        res.status(200).json({ message: "Login successful", token , isVerified: isEmailExist.isVerified});
+        res.status(200).json({
+          message: "Login successful",
+          token,
+          isVerified: isEmailExist.isVerified,
+        });
       }
     }
   } catch (error) {
@@ -101,7 +106,6 @@ export const SignUp = async (req, res) => {
         ville,
         verificationToken: verificationTokenId,
         password: hashedPassword,
-        
       });
 
       await user.save();
@@ -170,8 +174,6 @@ export const SignUp = async (req, res) => {
     console.log(error);
   }
 };
-
-
 export const getUser = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -184,6 +186,61 @@ export const getUser = async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const getProfileUser = async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.params.currentUser).select(
+      "-password"
+    );
+    const profileUser = await User.findById(req.params.profileUser).select(
+      "-password"
+    );
+    var pending = false
+    if(profileUser.friendsRequests.some(f => f.id.toString() === currentUser._id.toString())){
+      pending = true
+    }
+    if (!profileUser || !currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const isFriend = currentUser.friends.some(
+      (f) => f.id.toString() === profileUser._id.toString()
+    );
+    const isBlocked = (currentUser.blocked.some(
+      (b) => b.id.toString() === profileUser._id.toString()
+    ) || profileUser.blocked.some(
+      (b) => b.id.toString() === currentUser._id.toString()
+    ));
+    if (isBlocked) {
+      return res.status(403).json({ message: "This User is unavailable " } , isBlocked);
+    } else {
+      if (!isFriend) {
+        const userData = {
+          _id: profileUser._id,
+          firstName: profileUser.firstName,
+          lastName: profileUser.lastName,
+          ministère: profileUser.ministère,
+          département: profileUser.département,
+          fonction: profileUser.fonction,
+          ville: profileUser.ville,
+          etablissement: profileUser.etablissement,
+          profileImage: profileUser.profileImage,
+          isFriend: isFriend,
+          isBlocked: isBlocked,
+          pending: pending,
+          createdAt: profileUser.createdAt,
+        };
+        res.status(200).json(userData);
+        return;
+      } else {
+        res.status(200).json(profileUser);
+        return;
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -204,7 +261,6 @@ export const verifyEmail = async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 };
-
 export const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -220,95 +276,89 @@ export const deleteUser = async (req, res) => {
     console.log(error);
   }
 };
-
-
-export const editUser = async(req,res)=>{
-  
-try {
-  
-  const user =  await User.findById(req.params.id)
-  const userId = user._id
-  const userPosts = await Post.find({createdBy : userId})
-  const email = req.params.email
-  const isEmailExist = await User.findOne({email})
-
-  const {firstName,lastName} = req.body
-  if(!user){
-    return res.status(400).json({message:"User not found"})
-  }else{
-    user.firstName = firstName
-    user.lastName = lastName
-    userPosts.forEach(async(post)=>{
-      post.postUser = `${firstName} ${lastName}`
-      await post.save()
-    })
-    await user.save()
-    const token = jwt.sign(
-          {
-            id: isEmailExist._id,
-            firstName: isEmailExist.firstName,
-            lastName: isEmailExist.lastName,
-            email: isEmailExist.email,
-            phone: isEmailExist.phone,
-            sexe: isEmailExist.sexe,
-            adress: isEmailExist.adress,
-            ministère: isEmailExist.ministère,
-            département: isEmailExist.département,
-            fonction: isEmailExist.fonction,
-            grade: isEmailExist.grade,
-            echelle: isEmailExist.echelle,
-            ville: isEmailExist.ville,
-            etablissement: isEmailExist.etablissement,
-            role: isEmailExist.role,
-            isVerified: isEmailExist.isVerified,
-            verificationToken: isEmailExist.verificationToken,
-            birthDate: isEmailExist.birthDate,
-            birthplace: isEmailExist.birthplace,
-            active: isEmailExist.active,
-            profileImage: isEmailExist.profileImage,
-            coverImage: isEmailExist.coverImage,
-            bio: isEmailExist.bio,
-          },
-          process.env.JWT_SECRET_KEY,
-          { expiresIn: "7d" }
-        );
-    res.status(200).json({message:"User edited successfuly" , token});
-  }
-
-} catch (error) {
-  console.log(error);
-}
-}
-
-export const editPassword =async (req,res)=>{
+export const editUser = async (req, res) => {
   try {
-    const userId = req.params.id
-    const user = await User.findById(userId)
-    const oldPassword = req.body.oldPassword
-    const newPassword = req.body.newPassword
-    const client = process.env.CLIENT_URL
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL,
-          pass: process.env.PASSWORD,
-        },
+    const user = await User.findById(req.params.id);
+    const userId = user._id;
+    const userPosts = await Post.find({ createdBy: userId });
+    const email = req.params.email;
+    const isEmailExist = await User.findOne({ email });
+
+    const { firstName, lastName } = req.body;
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    } else {
+      user.firstName = firstName;
+      user.lastName = lastName;
+      userPosts.forEach(async (post) => {
+        post.postUser = `${firstName} ${lastName}`;
+        await post.save();
       });
-    if(!user){
-      return res.status(400).json({message:"User not found"})
+      await user.save();
+      const token = jwt.sign(
+        {
+          id: isEmailExist._id,
+          firstName: isEmailExist.firstName,
+          lastName: isEmailExist.lastName,
+          email: isEmailExist.email,
+          phone: isEmailExist.phone,
+          sexe: isEmailExist.sexe,
+          adress: isEmailExist.adress,
+          ministère: isEmailExist.ministère,
+          département: isEmailExist.département,
+          fonction: isEmailExist.fonction,
+          grade: isEmailExist.grade,
+          echelle: isEmailExist.echelle,
+          ville: isEmailExist.ville,
+          etablissement: isEmailExist.etablissement,
+          role: isEmailExist.role,
+          isVerified: isEmailExist.isVerified,
+          verificationToken: isEmailExist.verificationToken,
+          birthDate: isEmailExist.birthDate,
+          birthplace: isEmailExist.birthplace,
+          active: isEmailExist.active,
+          profileImage: isEmailExist.profileImage,
+          coverImage: isEmailExist.coverImage,
+          bio: isEmailExist.bio,
+        },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: "7d" }
+      );
+      res.status(200).json({ message: "User edited successfuly", token });
     }
-    const isMatched = await bcrypt.compare(oldPassword, user.password)
-    if(!isMatched){
-      return res.status(400).json({message:"Old password is incorrect"})
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const editPassword = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+    const client = process.env.CLIENT_URL;
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
+      },
+    });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
     }
-    const hashedPassword = await bcrypt.hash(newPassword, 10)
-    user.password = hashedPassword
-    await user.save()
+    const isMatched = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatched) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
     transporter.sendMail({
-        from: process.env.EMAIL,
-        to: user.email,
-        subject: "Password Changed Successfully",
-        html:`
+      from: process.env.EMAIL,
+      to: user.email,
+      subject: "Password Changed Successfully",
+      html: `
           <!-- Password Changed Email Template (use in transactional email, inline CSS for max compatibility) -->
 <!doctype html>
 <html lang="en">
@@ -345,39 +395,49 @@ export const editPassword =async (req,res)=>{
 </body>
 </html>
 
-        `
-      })
-    res.status(200).json({message:"Password edited successfuly"})
-    
+        `,
+    });
+    res.status(200).json({ message: "Password edited successfuly" });
   } catch (error) {
     console.log(error);
   }
-}
-
-
-export const edit = async (req,res)=>{
+};
+export const edit = async (req, res) => {
   try {
-    const userId = req.params.id
-    const user = await User.findById(userId)
-    if(!user){
-      return res.status(400).json({message:"User not found"})
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
     }
-    const { phone, bio, birthDate, birthplace, adress, ministère, département, fonction, grade, echelle, ville, etablissement } = req.body;
-    user.phone = phone
-    user.bio = bio
-    user.birthDate = birthDate
-    user.birthplace = birthplace
-    user.adress = adress
-    user.ministère = ministère
-    user.département = département
-    user.fonction = fonction
-    user.grade = grade
-    user.echelle = echelle
-    user.ville = ville
-    user.etablissement = etablissement
-    await user.save()
-    res.status(200).json({message:"User edited successfuly"})
+    const {
+      phone,
+      bio,
+      birthDate,
+      birthplace,
+      adress,
+      ministère,
+      département,
+      fonction,
+      grade,
+      echelle,
+      ville,
+      etablissement,
+    } = req.body;
+    user.phone = phone;
+    user.bio = bio;
+    user.birthDate = birthDate;
+    user.birthplace = birthplace;
+    user.adress = adress;
+    user.ministère = ministère;
+    user.département = département;
+    user.fonction = fonction;
+    user.grade = grade;
+    user.echelle = echelle;
+    user.ville = ville;
+    user.etablissement = etablissement;
+    await user.save();
+    res.status(200).json({ message: "User edited successfuly" });
   } catch (error) {
     console.log(error);
   }
-}
+};

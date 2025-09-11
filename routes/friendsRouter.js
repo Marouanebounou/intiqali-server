@@ -7,6 +7,7 @@ router.post("/send-request/:userId/:reciverId", async (req, res) => {
   try {
     const sender = await User.findById(req.params.userId);
     const reciver = await User.findById(req.params.reciverId);
+    var pending = false;
     if (!sender || !reciver) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -58,7 +59,8 @@ router.post("/send-request/:userId/:reciverId", async (req, res) => {
     });
     await sender.save();
     await reciver.save();
-    res.status(200).json({ message: "Friend request sent" });
+    pending = true;
+    res.status(200).json({ message: "Friend request sent", pending });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -247,13 +249,16 @@ router.post("/cancel-request/:userId/:reciverId", async (req, res) => {
     if (!isRequestSent) {
       return res.status(400).json({ message: "No friend request to cancel" });
     }
-    reciver.friendsRequests = reciver.friendsRequests.filter(
-      (request) => request.id.toString() !== sender._id.toString()
-    );
-    // Remove the request object from sender
-    sender.requestSent = sender.requestSent.filter(
-      (request) => request.id.toString() !== reciver._id.toString()
-    );
+    // Remove the request from receiver.friendsRequests
+    await User.findByIdAndUpdate(reciver._id, {
+      $pull: { friendsRequests: { id: sender._id } },
+    });
+
+    // Remove the request from sender.requestSent
+    await User.findByIdAndUpdate(sender._id, {
+      $pull: { requestSent: { id: reciver._id } },
+    });
+
     await sender.save();
     await reciver.save();
     res.status(200).json({ message: "Friend request canceled" });
@@ -294,23 +299,36 @@ router.post("/unblock-user/:userId/:blockedId", async (req, res) => {
     const user = await User.findById(req.params.userId);
     const toUnblock = await User.findById(req.params.blockedId);
     if (!user || !toUnblock) {
-        return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
     const isBlocked = user.blocked.some(
-        (b) => b.id.toString() === toUnblock._id.toString()
+      (b) => b.id.toString() === toUnblock._id.toString()
     );
     if (!isBlocked) {
-        return res.status(400).json({ message: "User is not blocked" });
+      return res.status(400).json({ message: "User is not blocked" });
     }
     user.blocked = user.blocked.filter(
-        (b) => b.id.toString() !== toUnblock._id.toString()
+      (b) => b.id.toString() !== toUnblock._id.toString()
     );
     await user.save();
     res.status(200).json({ message: "User unblocked" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
-  } 
+  }
+});
+
+router.get("/list/blocked/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select("blocked");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ user });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 export default router;
