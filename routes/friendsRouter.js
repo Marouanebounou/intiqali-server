@@ -272,6 +272,8 @@ router.post("/block-user/:userId/:blockedId", async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     const toBlock = await User.findById(req.params.blockedId);
+    const sender = await User.findById(req.params.userId);
+    const reciver = await User.findById(req.params.blockedId);
     if (!user || !toBlock) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -286,6 +288,22 @@ router.post("/block-user/:userId/:blockedId", async (req, res) => {
       name: toBlock.firstName + " " + toBlock.lastName,
       profileImage: toBlock.profileImage,
     });
+    await User.findByIdAndUpdate(reciver._id, {
+      $pull: { friendsRequests: { id: sender._id } },
+    });
+    await User.findByIdAndUpdate(reciver._id, {
+      $pull: { requestSent: { id: sender._id } },
+    });
+    // Remove the request from sender.requestSent
+    await User.findByIdAndUpdate(sender._id, {
+      $pull: { requestSent: { id: reciver._id } },
+    });
+    await User.findByIdAndUpdate(sender._id, {
+      $pull: { friendsRequests: { id: reciver._id } },
+    });
+
+    await sender.save();
+    await reciver.save();
     await user.save();
     res.status(200).json({ message: "User blocked" });
   } catch (error) {
