@@ -212,6 +212,10 @@ export const getProfileUser = async (req, res) => {
     ) || profileUser.blocked.some(
       (b) => b.id.toString() === currentUser._id.toString()
     ));
+    var isAddingMe = false
+    if(profileUser.requestSent.some(f => f.id.toString() === currentUser._id.toString())){
+      isAddingMe = true
+    }
     if (isBlocked) {
       return res.status(403).json({ message: "This User is unavailable " } , isBlocked);
     } else {
@@ -230,6 +234,7 @@ export const getProfileUser = async (req, res) => {
           isBlocked: isBlocked,
           pending: pending,
           createdAt: profileUser.createdAt,
+          isAddingMe: isAddingMe
         };
         res.status(200).json(userData);
         return;

@@ -78,6 +78,17 @@ router.post("/accept-request/:senderId/:reciverId", async (req, res) => {
     const alreadyFriends =
       sender.friends.some((f) => f.id.toString() === reciver._id.toString()) ||
       reciver.friends.some((f) => f.id.toString() === sender._id.toString());
+
+    const isRequestSent =
+      sender.requestSent.some(
+        (f) => f.id.toString() === reciver._id.toString()
+      ) ||
+      reciver.friendsRequests.some(
+        (f) => f.id.toString() === sender._id.toString()
+      );
+    if (!isRequestSent) {
+      return res.status(400).json({ message: "No friend request to accept" });
+    }
     if (alreadyFriends) {
       return res.status(400).json({ message: "Users are already friends" });
     }
