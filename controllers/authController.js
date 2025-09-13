@@ -215,7 +215,7 @@ export const getProfileUser = async (req, res) => {
     if (isBlocked) {
       return res.status(403).json({ message: "This User is unavailable " } , isBlocked);
     } else {
-      if (!isFriend) {
+    
         const userData = {
           _id: profileUser._id,
           firstName: profileUser.firstName,
@@ -233,10 +233,6 @@ export const getProfileUser = async (req, res) => {
         };
         res.status(200).json(userData);
         return;
-      } else {
-        res.status(200).json(profileUser);
-        return;
-      }
     }
   } catch (error) {
     console.log(error);
