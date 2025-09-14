@@ -30,10 +30,11 @@ const connectDb = async () => {
   } catch (error) {
     console.error("Database connection error:", error.message);
     
-    // In production (Vercel), we might want to exit gracefully
+    // In production (Vercel), don't exit - let the function handle it gracefully
     if (process.env.NODE_ENV === 'production') {
-      console.error("Fatal: Cannot connect to database in production");
-      process.exit(1);
+      console.error("Database connection failed in production, but continuing...");
+      // Don't exit in serverless environment
+      return;
     }
     
     // In development, just log the error
