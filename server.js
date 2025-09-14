@@ -1,25 +1,29 @@
 import express from 'express';
-import connectDB from './config/db.js';
-import './config/cloudinary.js'; // Import cloudinary config
-import authRouter from './routes/authRouter.js';
-import finishProfileRouter from './routes/finishProfileRouter.js';
-import postsRouter from './routes/postsRouter.js';
-import commentsRouter from './routes/commentsRouter.js';
-import likesRouter from './routes/likesRouter.js';
-import messagesRouter from './routes/messagesRouter.js';
-import friendsRouter from './routes/friendsRouter.js';
+import cors from 'cors';
+
+// Import database connection (but don't call it yet)
+// import connectDB from './config/db.js';
+// import './config/cloudinary.js'; // Import cloudinary config
+
+// Import routes (commented out for now to isolate the issue)
+// import authRouter from './routes/authRouter.js';
+// import finishProfileRouter from './routes/finishProfileRouter.js';
+// import postsRouter from './routes/postsRouter.js';
+// import commentsRouter from './routes/commentsRouter.js';
+// import likesRouter from './routes/likesRouter.js';
+// import messagesRouter from './routes/messagesRouter.js';
+// import friendsRouter from './routes/friendsRouter.js';
 import { Server } from 'socket.io';
 import http from 'http';
-import cors from 'cors';
 
 // Create the Express app
 const app = express();
 
-// Connect to database (non-blocking for serverless)
-connectDB().catch(err => {
-    console.error('Database connection failed:', err);
-    // Don't exit in serverless environment, let the function handle it gracefully
-});
+// Connect to database (commented out for now)
+// connectDB().catch(err => {
+//     console.error('Database connection failed:', err);
+//     // Don't exit in serverless environment, let the function handle it gracefully
+// });
 
 app.use(express.json());
 
@@ -54,13 +58,14 @@ app.use((req, res, next) => {
     }
 });
 
-app.use('/api/auth', authRouter);
-app.use('/api/profile', finishProfileRouter);
-app.use('/api/posts', postsRouter);
-app.use('/api/post', likesRouter);
-app.use('/api/comment', commentsRouter);
-app.use('/api/messages', messagesRouter);
-app.use('/api/friends' , friendsRouter);
+// Routes commented out for now to isolate the issue
+// app.use('/api/auth', authRouter);
+// app.use('/api/profile', finishProfileRouter);
+// app.use('/api/posts', postsRouter);
+// app.use('/api/post', likesRouter);
+// app.use('/api/comment', commentsRouter);
+// app.use('/api/messages', messagesRouter);
+// app.use('/api/friends' , friendsRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -71,13 +76,21 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Add route aliases for backward compatibility
-app.use('/auth', authRouter);
-app.use('/profile', finishProfileRouter);
-app.use('/posts', postsRouter);
-app.use('/post', likesRouter);
-app.use('/comment', commentsRouter);
-app.use('/messages', messagesRouter);
+// Simple test endpoint
+app.get('/test', (req, res) => {
+    res.status(200).json({ 
+        message: 'Server is working!',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Add route aliases for backward compatibility (commented out)
+// app.use('/auth', authRouter);
+// app.use('/profile', finishProfileRouter);
+// app.use('/posts', postsRouter);
+// app.use('/post', likesRouter);
+// app.use('/comment', commentsRouter);
+// app.use('/messages', messagesRouter);
 
 // Global error handler
 app.use((err, req, res, next) => {
