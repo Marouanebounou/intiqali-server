@@ -1,7 +1,5 @@
 import Post from "../models/Post.js";
 import Likes from "../models/Likes.js";
-import nodemailer from 'nodemailer' 
-import {io}  from '../server.js'
 
 export const likePost = async(req,res)=>{
     try {
@@ -19,17 +17,15 @@ export const likePost = async(req,res)=>{
         if(isLiked){
             await Likes.findByIdAndDelete(isLiked._id)
             await Post.findByIdAndUpdate(postId,{$inc:{likesCount:-1}})
-            io.emit('unlike',postId)
             res.status(200).json({message:"Post unliked successfuly"})
         }else{
             const newLike = new Likes({post:postId,user:userId})
             await newLike.save()
             await Post.findByIdAndUpdate(postId,{$inc:{likesCount:1}})
-            io.emit('like', postId)
             res.status(200).json({message:"Post liked successfuly"})
         }
     } catch (error) {
-        console.log(error);
+        console.log(error.message);
         res.status(500).json({ message: "Error processing like" });
     }
 }
@@ -53,8 +49,6 @@ export const unlikePost = async(req,res)=>{
             await Likes.findByIdAndDelete(isLiked._id)
             //dicreamnt likes on post
             await Post.findByIdAndUpdate(postId,{$inc:{likesCount:-1}})
-            
-            io.emit('unlike',postId)
             res.status(200).json({message:"Post unliked successfuly"})
         }
     } catch (error) {
