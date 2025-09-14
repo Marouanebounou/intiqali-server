@@ -25,11 +25,12 @@ export const likePost = async(req,res)=>{
             const newLike = new Likes({post:postId,user:userId})
             await newLike.save()
             await Post.findByIdAndUpdate(postId,{$inc:{likesCount:1}})
+            io.emit('like', postId)
             res.status(200).json({message:"Post liked successfuly"})
         }
     } catch (error) {
         console.log(error);
-            
+        res.status(500).json({ message: "Error processing like" });
     }
 }
 
@@ -58,6 +59,7 @@ export const unlikePost = async(req,res)=>{
         }
     } catch (error) {
         console.log(error);
+        res.status(500).json({ message: "Error processing unlike" });
     }
 }
 
@@ -74,6 +76,7 @@ export const getLikes = async(req,res)=>{
         }
     } catch (error) {
         console.log(error);
+        res.status(500).json({ message: "Error fetching likes" });
     }
 }
 
