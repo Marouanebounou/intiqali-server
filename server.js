@@ -25,7 +25,7 @@ app.use(express.json());
 
 // CORS configuration - allow all origins
 app.use(cors({
-    origin: ['https://intiqali.netlify.app', 'http://localhost:3000', 'http://localhost:5173'],
+    origin: ['https://intiqali.netlify.app/', 'http://localhost:3000', 'http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with'],
     credentials: true
@@ -36,7 +36,7 @@ app.options('*', cors());
 
 // Additional CORS middleware for serverless environment
 app.use((req, res, next) => {
-    const allowedOrigins = ['https://intiqali.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
+    const allowedOrigins = ['https://intiqali.netlify.app/', 'http://localhost:3000', 'http://localhost:5173'];
     const origin = req.headers.origin;
     
     if (allowedOrigins.includes(origin)) {
