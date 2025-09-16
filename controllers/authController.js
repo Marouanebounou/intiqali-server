@@ -109,7 +109,7 @@ export const SignUp = async (req, res) => {
       });
 
       await user.save();
-      const transporter = nodemailer.createTransport({
+       const  transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
           user: process.env.EMAIL,
@@ -119,7 +119,7 @@ export const SignUp = async (req, res) => {
 
       const verificationUrl = `${process.env.CLIENT_URL}verify/${verificationTokenId}`;
 
-      transporter.sendMail({
+     await transporter.sendMail({
         from: process.env.EMAIL,
         to: email,
         subject: "Welcome to intiqali",
