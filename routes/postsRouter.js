@@ -8,9 +8,9 @@ const router = Router()
 //id of the user
 router.post('/create/:id',uploade.single('img')  ,createPost)
 //id of the post
-router.put('/update/:id' , requireAuth, postAuth , editPost)
+router.put('/update/:id' , postAuth , editPost)
 //id of the post
-router.delete('/delete/:id', requireAuth, postAuth , deletePost)
+router.delete('/delete/:id' , deletePost)
 // like post
 router.post('/like/:id', requireAuth, like)
 //all posts in the home page
