@@ -8,9 +8,10 @@ import commentsRouter from './routes/commentsRouter.js';
 import likesRouter from './routes/likesRouter.js';
 import messagesRouter from './routes/messagesRouter.js';
 import friendsRouter from './routes/friendsRouter.js';
+import userRoutes from './routes/userRoutes.js';
 import { Server } from 'socket.io';
 import http from 'http';
-import cors from 'cors';
+
 
 // Create the Express app
 const app = express();
@@ -56,6 +57,7 @@ app.use('/api/post', likesRouter);
 app.use('/api/comment', commentsRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/friends' , friendsRouter);
+app.use("/api/users", userRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
